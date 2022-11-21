@@ -25,6 +25,7 @@ EXCLUDED_SCRIPTS = [
     "setup",
     "cleanup",
     "run-job",
+    "run-pipeline-job-with-registry-components",
     "deploy-custom-container-multimodel-minimal",
     "run-pipeline-jobs",
 ]
@@ -73,8 +74,13 @@ def main(args):
     ]
 
     jobs_using_registry_components = sorted(
-        glob.glob("jobs/pipelines-with-components/**/*pipeline*.yml", recursive=True)
+        glob.glob("jobs/pipelines-with-components/basics/**/*pipeline*.yml", recursive=True)
     )
+    jobs_using_registry_components = [
+        job.replace(".yml", "")
+        for job in jobs_using_registry_components
+        if not any(excluded in job for excluded in EXCLUDED_JOBS)
+    ]
 
     # get list of endpoints
     endpoints = sorted(glob.glob("endpoints/**/*.yml", recursive=True))
@@ -417,7 +423,7 @@ jobs:
 
 def write_job_using_registry_components_workflow(job):
     filename, project_dir, hyphenated = parse_path(job)
-    folder_name = filename.split("/")[-1]
+    folder_name = project_dir.split("/")[-1]
     is_pipeline_sample = "jobs/pipelines" in job
     creds = CREDENTIALS
     # Duplicate name in working directory during checkout
